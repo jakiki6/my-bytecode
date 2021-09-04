@@ -87,7 +87,7 @@ def pop_stack(is_rs):
 running = True
 while running:
     if debug:
-        print(f"pc: 0x{hex(pc)[2:].zfill(2)}")
+        print(f"pc: 0x{hex(pc)[2:].zfill(4)}")
 
     opcode = fetch_byte()
     is_rs = (opcode & 0b10000000) >> 7

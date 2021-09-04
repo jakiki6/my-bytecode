@@ -173,7 +173,11 @@ def process(text):
     preprocess(data)
 
     if "DEBUG" in os.environ.keys():
-        print(data)
+        for opcode in data:
+            if isinstance(opcode, OpCode):
+                print(opcode.opcode, " ".join(opcode.args))
+            else:
+                print(opcode.name + ":")
 
     tosplice = []
     labels = {}

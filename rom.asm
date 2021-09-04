@@ -1,5 +1,1 @@
-loop:	0x0000 dei
-	0x04 eq jmpc exit
-	jmp loop
-exit:	0x6969 0x0001 deo
-	brk
+_start:	0x0045 0x0003 deo

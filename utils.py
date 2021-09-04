@@ -23,6 +23,10 @@ def req_int_big(string, splices, tosplice, binary, const=False):
     except:
         pass
 
+    if len(string) == 3:
+        if string[0] == "'" and string[2] == "'":
+            return ord(string[1])
+
     if len(string) > 2:
         if string[0] == "0":    # prefix like 0x or 0b
             if string[1] in bases.keys():

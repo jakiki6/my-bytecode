@@ -28,6 +28,8 @@ def write(regs):
         mods["ps"] = regs["val"]
     elif regs["addr"] == 0x0002:
         mods["rs"] = regs["val"]
+    elif regs["addr"] == 0x0003:
+        exit(regs["val"])
 
     return mods
 
