@@ -87,14 +87,11 @@ def pop_stack(is_rs):
 running = True
 while running:
     if debug:
-        print(f"pc: {pc}")
+        print(f"pc: 0x{hex(pc)[2:].zfill(2)}")
 
     opcode = fetch_byte()
     is_rs = (opcode & 0b10000000) >> 7
     func = opcode & 0b01111111
-
-    if debug:
-        print(f"func {bin(func)} is_rs {is_rs} opcode {hex(opcode)}")
 
     if func == 0b0000000:   # break
         running = False
@@ -234,5 +231,6 @@ while running:
         print(f"Unknown function {bin(func)} with rs flag set to '{is_rs}'")
         running = False
 
+print(f"Halted execution with registers pc=0x{hex(pc)[2:].zfill(4)} ps=0x{hex(ps)[2:].zfill(4)} rs=0x{hex(rs)[2:].zfill(4)}")
 with open("ram.bin", "wb") as file:
     file.write(ram)
