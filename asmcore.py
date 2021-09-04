@@ -70,11 +70,45 @@ def consumes(opcode):
     else:
         return 0    # number or non-consuming opcode?
 
+def check_string(char, in_string, in_escape):
+    if not in_string:                
+        if char == "\"":
+            in_string = True
+    else:
+        if not in_escape:
+            if char == "\"":
+                in_string = False
+            elif char == "\\":   
+                in_escape = True 
+        else:
+            in_escape = False
+
+    return in_string, in_escape
+
+def split_string(string, dil):
+    strings = [""]
+    in_string = False
+    in_escape = False
+
+    for char in string:
+        in_string, in_escape = check_string(char, in_string, in_escape)
+
+        if not in_string and char == dil:
+            strings.append("")
+        else:
+            strings[-1] += char
+
+    return strings
+
 def replace_whitespaces(line):
     nline = ""
     hit = False
+    in_string = False
+    in_escape = False
     for char in line:
-        if char in " \t,":
+        in_string, in_escape = check_string(char, in_string, in_escape)
+
+        if char in " \t," and not in_string:
             if not hit:
                 nline += " "
                 hit = True
@@ -87,14 +121,28 @@ def replace_whitespaces(line):
 def parse(text):
     opcodes = []
     lline = ""
-    is_escape = False
+    is_nl = False
     for line in text.split("\n"):
-        if is_escape:
+        if is_nl:
             line = lline + line
-            is_escape = False
+            is_nl = False
+
         line = line.strip()
-        line = line.split(";")[0].strip()
+
+        in_string = False
+        in_escape = False
+        _line = line
+        line = ""
+        for char in _line:
+            in_string, in_escape = check_string(char, in_string, in_escape)
+
+            if not in_string and char == ";":
+                break
+
+            line += char
+
         line = replace_whitespaces(line)
+
         if len(line) == 0:
             continue
         if line[-1] == "\\":
@@ -102,13 +150,13 @@ def parse(text):
             lline = line[:-1]
         else:
             if ":" in line:
-                label_name = line.split(":")[0].strip()
-                line = line.split(":")[1].split(" ")
+                label_name = split_string(line, ":")[0].strip()
+                line = split_string(split_string(line, ":")[1], " ")
                 opcodes.append(Label(label_name))
                 while "" in line:
                     line.remove("")
             else:
-                line = line.split(" ")
+                line = split_string(line, " ")
 
             while len(line) > 0:
                 o = line.pop(0)
@@ -175,7 +223,7 @@ def process(text):
     if "DEBUG" in os.environ.keys():
         for opcode in data:
             if isinstance(opcode, OpCode):
-                print(opcode.opcode, " ".join(opcode.args))
+                print(opcode.opcode, opcode.args)
             else:
                 print(opcode.name + ":")
 
@@ -196,7 +244,7 @@ def process(text):
                 for arg in opcode.args:
                     num = utils.req_int_big(arg, [len(binary)], tosplice, binary)
 
-                    binary += bytearray(int.to_bytes(num, math.ceil((num.bit_length() + (num < 0)) / 8), "big", signed=(num < 0)))
+                    binary += bytearray(int.to_bytes(num, math.ceil((num.bit_length() + (num < 0)) / 8), "little", signed=(num < 0)))
             elif opcode.opcode == "org":
                 if len(opcode.args) != 1:
                     print("org: wrong number of arguments")

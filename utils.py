@@ -4,6 +4,12 @@ bases = {
     "o": 8
 }
 
+ESCAPES = {
+    "n": "\n",
+    "t": "\t",
+    "r": "\r"
+}
+
 def shift_line(data, num):
     for i in range(0, num):
         data.opcode = data.args[0]
@@ -26,6 +32,25 @@ def req_int_big(string, splices, tosplice, binary, const=False):
     if len(string) == 3:
         if string[0] == "'" and string[2] == "'":
             return ord(string[1])
+
+    if string.startswith("\"") and string.endswith("\""):
+        val = ""
+        escape = False
+        for char in string[1:-1]:
+            if escape:
+                if char in ESCAPES.keys():
+                    char = ESCAPES[char]
+
+                val += char
+                escape = False
+            else:
+                if char == "\\":
+                    escape = True
+                else:
+                    val += char
+
+        val = int.from_bytes(val.encode(), "little")
+        return val
 
     if len(string) > 2:
         if string[0] == "0":    # prefix like 0x or 0b
