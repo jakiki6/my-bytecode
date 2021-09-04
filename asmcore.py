@@ -11,9 +11,9 @@ OPCODES = {
     "not": 0b0001000,
     "gth": 0b0001001,
     "lth": 0b0001010,
-    "jmp": 0b0001011,
-    "jmpc": 0b0001100,
-    "call": 0b0001101,
+    "sjmp": 0b0001011,
+    "sjmpc": 0b0001100,
+    "scall": 0b0001101,
     "sth": 0b0001110,
     "add": 0b0001111,
     "sub": 0b0010000,
@@ -39,7 +39,10 @@ CONSUMES = {
     "times": -1,
     "setps": 1,
     "setrs": 1,
-    "lit": 1
+    "lit": 1,
+    "jmp": 1,
+    "jmpc": 1,
+    "call": 1
 }
 
 origin = 0
@@ -206,18 +209,30 @@ def process(text):
                     flags = 0b00000000
 
                 if opcode.opcode == "setps":
-                    num = utils.req_int_big(opcode.args[0], [len(binary) + 1], tosplice, binary)
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
 
                     binary += bytearray([0x02, *utils.pack_num(num)])
                 elif opcode.opcode == "setrs":
-                    num = utils.req_int_big(opcode.args[0], [len(binary) + 1], tosplice, binary)
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
 
                     binary += bytearray([0x82, *utils.pack_num(num)])
                 elif opcode.opcode == "lit":
                     for arg in opcode.args:
-                        num = utils.req_int_big(arg, [len(binary) + 1], tosplice, binary)
+                        num = utils.req_int(arg, [len(binary) + 1], tosplice, binary)
 
                         binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                elif opcode.opcode == "jmp":
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
+                    binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                    binary += bytearray([OPCODES["sjmp"] | flags])
+                elif opcode.opcode == "jmpc":
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
+                    binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                    binary += bytearray([OPCODES["sjmpc"] | flags])
+                elif opcode.opcode == "call":
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
+                    binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                    binary += bytearray([OPCODES["scall"] | flags])
                 elif opcode.opcode in OPCODES.keys():
                     binary += bytearray([OPCODES[opcode.opcode] | flags])
                 else:

@@ -1,4 +1,4 @@
 loop:	0x0000 dei
-	0x04 eq exit jmpc
-	loop jmp
+	0x04 eq jmpc exit
+	jmp loop
 exit:	brk
