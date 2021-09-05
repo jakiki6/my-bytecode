@@ -59,28 +59,28 @@ def fetch_byte():
 def fetch_word():
     global pc, ram, ws
     res = read_word(pc)
-    pc = (pc + 2) % (256 ** ws)
+    pc = (pc + ws) % (256 ** ws)
     return res
 
 def push_ps(word):
     global ps, ws
-    ps = (ps - 2) % (256 ** ws)
+    ps = (ps - ws) % (256 ** ws)
     write_word(word, ps)
 
 def pop_ps():
     global ps, ws
     res = read_word(ps)
-    ps = (ps + 2) % (256 ** ws)
+    ps = (ps + ws) % (256 ** ws)
     return res
 
 def push_rs(word):
     global rs, ws
     write_word(word, rs)
-    rs = (rs + 2) % (256 ** ws)
+    rs = (rs + ws) % (256 ** ws)
 
 def pop_rs():
     global rs, ws
-    rs = (rs - 2) % (256 ** ws)
+    rs = (rs - ws) % (256 ** ws)
     res = read_word(rs)
     return res
 
