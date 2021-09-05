@@ -1,5 +1,6 @@
 #!/bin/env python3
-import sys, os, asmcore
+import sys, os
+from asm import asmcore
 
 if len(sys.argv) < 2:
     print(sys.argv[0], "<file>", "[<output>]")

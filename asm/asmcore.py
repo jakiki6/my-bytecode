@@ -1,5 +1,5 @@
 import sys, math, os
-import utils
+from . import utils
 
 OPCODES = {
     "brk": 0b0000000,
@@ -313,10 +313,6 @@ def process(text):
                     binary += bytearray([0x01, *utils.pack_num(0, ws)])
         else:
             labels[opcode.name] = len(binary)
-
-        if len(binary) >= 0xff00:
-            print("Binary size too big")
-            exit(0)
 
     if "DEBUG" in os.environ.keys():
         print(labels)
