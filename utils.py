@@ -16,13 +16,13 @@ def shift_line(data, num):
         data.args.pop(0)
     return data
 
-def req_int(string, splices, tosplice, binary):
-    return req_int_big(string, splices, tosplice, binary) % 65536
+def req_int(string, splices, tosplice, binary, ws):
+    return req_int_big(string, splices, tosplice, binary, ws) % (256 ** ws)
 
-def req_int_const(string, splices, tosplice, binary):
-    return req_int_big(string, splices, tosplice, binary, True) % 65536
+def req_int_const(string, splices, tosplice, binary, ws):
+    return req_int_big(string, splices, tosplice, binary, ws, True) % (256 ** ws)
 
-def req_int_big(string, splices, tosplice, binary, const=False):
+def req_int_big(string, splices, tosplice, binary, ws, const=False):
     try:
         res = int(string)       # number
         return res
@@ -68,11 +68,20 @@ def req_int_big(string, splices, tosplice, binary, const=False):
         for splice in splices:
             tosplice.append({
                 "label": string,
-                "at": splice
+                "at": splice,
+                "size": ws
             })
         return 0xffff
 
     raise ValueError(f"{string} isn't a valid number!")
 
-def pack_num(num):
-    return [num & 0xff, num >> 8]
+def pack_num(num, ws):
+    res = []
+    for i in range(0, ws):
+        res.append(num % 256)
+        num >>= 8
+
+    if num > 0:
+        raise ValueError(f"Value too big for word size of {ws} byte(s)")
+
+    return res

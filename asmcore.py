@@ -37,6 +37,7 @@ CONSUMES = {
     "org": 1,
     "%include": -1,
     "times": -1,
+    "bits": 1,
     "setps": 1,
     "setrs": 1,
     "lit": 1,
@@ -46,6 +47,7 @@ CONSUMES = {
 }
 
 origin = 0
+ws = 0
 
 class OpCode(object):
     def __init__(self, opcode, args):
@@ -196,7 +198,7 @@ def preprocess(data):
         if not isinstance(line, OpCode):
             continue
         if line.opcode == "times":
-            num, s = utils.req_int(line.args[0])
+            num, s = utils.req_int_big(line.args[0], 64)
             if not s:
                 print(line.args[0], "is not a valid number")
                 exit(0)
@@ -208,8 +210,9 @@ def preprocess(data):
             break
 
 def process(text):
-    global origin
+    global origin, ws
     origin = 0
+    ws = 2
 
     binary = bytearray()
 
@@ -234,15 +237,15 @@ def process(text):
         if isinstance(opcode, OpCode):
             if len(opcode.args) == 0:
                 try:
-                    num = utils.req_int_const(opcode.opcode, [], [], bytes())
-                    binary += bytearray([0x01, *utils.pack_num(num)])
+                    num = utils.req_int_const(opcode.opcode, [], [], bytes(), ws)
+                    binary += bytearray([0x01, *utils.pack_num(num, ws)])
                     continue
                 except ValueError:
                     pass
 
             if opcode.opcode == "db":
                 for arg in opcode.args:
-                    num = utils.req_int_big(arg, [len(binary)], tosplice, binary)
+                    num = utils.req_int_big(arg, [len(binary)], tosplice, binary, ws)
 
                     binary += bytearray(int.to_bytes(num, math.ceil((num.bit_length() + (num < 0)) / 8), "little", signed=(num < 0)))
             elif opcode.opcode == "org":
@@ -250,9 +253,21 @@ def process(text):
                     print("org: wrong number of arguments")
                     exit(0)
 
-                num = utils.req_int_const(opcode.args[0], [], tosplice, binary)
+                num = utils.req_int_const(opcode.args[0], [], tosplice, binary, ws)
 
-                origin = num % 65536
+                origin = num % (256 ** ws)
+            elif opcode.opcode == "bits":
+                if len(opcode.args) != 1:
+                    print("bits: wrong number of arguments")
+                    exit(0)
+
+                num = utils.req_int_big(opcode.args[0], [], tosplice, binary, 64, True)
+
+                if num % 8:
+                    print(f"bits: {num} is unaligned")
+                    exit(0)
+
+                ws = num // 8
             else:
                 if opcode.opcode.endswith("r"):
                     opcode.opcode = opcode.opcode[:-1]
@@ -261,29 +276,29 @@ def process(text):
                     flags = 0b00000000
 
                 if opcode.opcode == "setps":
-                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary, ws)
 
-                    binary += bytearray([0x02, *utils.pack_num(num)])
+                    binary += bytearray([0x02, *utils.pack_num(num, ws)])
                 elif opcode.opcode == "setrs":
-                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary, ws)
 
-                    binary += bytearray([0x82, *utils.pack_num(num)])
+                    binary += bytearray([0x82, *utils.pack_num(num, ws)])
                 elif opcode.opcode == "lit":
                     for arg in opcode.args:
-                        num = utils.req_int(arg, [len(binary) + 1], tosplice, binary)
+                        num = utils.req_int(arg, [len(binary) + 1], tosplice, binary, ws)
 
-                        binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                        binary += bytearray([0x01 | flags, *utils.pack_num(num, ws)])
                 elif opcode.opcode == "jmp":
-                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
-                    binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary, ws)
+                    binary += bytearray([0x01 | flags, *utils.pack_num(num, ws)])
                     binary += bytearray([OPCODES["sjmp"] | flags])
                 elif opcode.opcode == "jmpc":
-                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
-                    binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary, ws)
+                    binary += bytearray([0x01 | flags, *utils.pack_num(num, ws)])
                     binary += bytearray([OPCODES["sjmpc"] | flags])
                 elif opcode.opcode == "call":
-                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary)
-                    binary += bytearray([0x01 | flags, *utils.pack_num(num)])
+                    num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary, ws)
+                    binary += bytearray([0x01 | flags, *utils.pack_num(num, ws)])
                     binary += bytearray([OPCODES["scall"] | flags])
                 elif opcode.opcode in OPCODES.keys():
                     binary += bytearray([OPCODES[opcode.opcode] | flags])
@@ -292,9 +307,10 @@ def process(text):
                         opcode.opcode += "r"
                     tosplice.append({
                         "label": opcode.opcode,
-                        "at": len(binary) + 1
+                        "at": len(binary) + 1,
+                        "size": ws
                     })
-                    binary += bytearray([0x01, *utils.pack_num(0xffff)])
+                    binary += bytearray([0x01, *utils.pack_num(0, ws)])
         else:
             labels[opcode.name] = len(binary)
 
@@ -302,17 +318,25 @@ def process(text):
             print("Binary size too big")
             exit(0)
 
+    if "DEBUG" in os.environ.keys():
+        print(labels)
+        print(tosplice)
+
     for splice in tosplice:
         if not splice["label"] in labels:
             print("undefined reference to", splice["label"])
             exit(0)
 
-        at = splice["at"] % 65536
+        at = splice["at"]
         val = labels[splice["label"]] + origin
-        binary[at] = val & 0xff
-        at = (at + 1) % 65536
-        binary[at] = val >> 8
+        size = splice["size"]
 
-    binary += bytearray(65536 - len(binary))
+        for i in range(0, size):
+            binary[at] = val % 256
+            val >>= 8
+            at += 1
+
+        if val > 0:
+            raise ValueError(f"splice at 0x{hex(at)[2:].zfill(2 * size)} is too big")
 
     return binary
