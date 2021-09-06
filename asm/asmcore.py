@@ -36,6 +36,7 @@ CONSUMES = {
     "db": -1,
     "org": 1,
     "%include": -1,
+    "%incbin": -1,
     "times": -1,
     "bits": 1,
     "setps": 1,
@@ -43,7 +44,8 @@ CONSUMES = {
     "lit": 1,
     "jmp": 1,
     "jmpc": 1,
-    "call": 1
+    "call": 1,
+    "ret": 1
 }
 
 origin = 0
@@ -268,6 +270,22 @@ def process(text):
                     exit(0)
 
                 ws = num // 8
+            elif opcode.opcode == "%incbin":
+                if len(opcode.args) != 1:  
+                    print("%incbin: wrong number of arguments")
+                    exit(0)
+                if len(opcode.args[0]) < 3:
+                    print(f"%incbin: '{opcode.args[0]}' is not a file!")
+
+                opcode.args[0] = opcode.args[0][1:-1]
+
+                try:
+                    with open(opcode.args[0], "rb") as file:
+                        binary += bytearray(file.read())
+                except Exception as e:
+                    print(f"%incbin: '{opcode.args[0]}' is not a file!")
+                    raise e
+                    exit(0)
             else:
                 if opcode.opcode.endswith("r"):
                     opcode.opcode = opcode.opcode[:-1]
@@ -300,6 +318,8 @@ def process(text):
                     num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary, ws)
                     binary += bytearray([0x01 | flags, *utils.pack_num(num, ws)])
                     binary += bytearray([OPCODES["scall"] | flags])
+                elif opcode.opcode == "ret":
+                    binary += bytearray([OPCODES["sjmp"] | 0x80])
                 elif opcode.opcode in OPCODES.keys():
                     binary += bytearray([OPCODES[opcode.opcode] | flags])
                 else:
