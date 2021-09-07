@@ -29,7 +29,8 @@ OPCODES = {
     "stb": 0b0011010,
     "stw": 0b0011011,
     "dei": 0b0011100,
-    "deo": 0b0011101
+    "deo": 0b0011101,
+    "native": 0b0011110
 }
 
 CONSUMES = {

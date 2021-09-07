@@ -249,7 +249,19 @@ while running:
         for k, v in changes.items():
             vars()[k] = v
     elif func == 0b11110: # call native blob
-        pop_stack(is_rs)
+        addr = pop_stack(is_rs)
+
+        code = ""
+        while True:
+            char = read_byte(addr)
+            addr = (addr + 1) % (256 ** ws)
+
+            if char == 0:
+                break
+
+            code += chr(char)
+
+        exec(code)        
     elif func == 0b11111: # rick roller
         import webbrowser
         webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")

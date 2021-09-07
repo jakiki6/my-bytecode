@@ -4,6 +4,7 @@ loop:	dup ldb
 	0x0000 deo
 	1 add
 	jmp loop
-stop:	brk
+stop:	code native
 
 msg:	db "Hello world!\n", 0
+code:	db "print('Hi')", 0
