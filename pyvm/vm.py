@@ -96,6 +96,15 @@ def pop_stack(is_rs):
     else:
         return pop_ps()
 
+def get_not_mask(size):
+    res = 0
+
+    for i in range(0, size):
+        res <<= 8
+        res |= 0xff
+
+    return res
+
 running = True
 while running:
     if debug:
@@ -144,7 +153,7 @@ while running:
         a = pop_stack(is_rs)
         push_stack(int(a == b), is_rs)
     elif func == 0b01000: # not
-        push_stack(pop_stack(is_rs) ^ 0xffff, is_rs)
+        push_stack(pop_stack(is_rs) ^ get_not_mask(ws), is_rs)
     elif func == 0b01001: # greater than
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
@@ -241,6 +250,9 @@ while running:
             vars()[k] = v
     elif func == 0b11110: # call native blob
         pop_stack(is_rs)
+    elif func == 0b11111: # rick roller
+        import webbrowser
+        webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
     else:
         print(f"Unknown function {bin(func)} with rs flag set to '{is_rs}'")
         running = False

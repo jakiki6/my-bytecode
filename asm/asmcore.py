@@ -104,6 +104,15 @@ def split_string(string, dil):
 
     return strings
 
+def pack_num(num):
+    length = math.ceil(num.bit_length() / 8)
+    if length == 0:
+        length = 1
+
+    num = num % (256 ** length)
+
+    return int.to_bytes(num, length, "little", signed=False)
+
 def replace_whitespaces(line):
     nline = ""
     hit = False
@@ -249,7 +258,7 @@ def process(text):
                 for arg in opcode.args:
                     num = utils.req_int_big(arg, [len(binary)], tosplice, binary, ws)
 
-                    binary += bytearray(int.to_bytes(num, math.ceil((num.bit_length() + (num < 0)) / 8), "little", signed=(num < 0)))
+                    binary += bytearray(pack_num(num))
             elif opcode.opcode == "org":
                 if len(opcode.args) != 1:
                     print("org: wrong number of arguments")
@@ -286,6 +295,10 @@ def process(text):
                     print(f"%incbin: '{opcode.args[0]}' is not a file!")
                     raise e
                     exit(0)
+            elif opcode.opcode == "ret":
+                binary += bytearray([OPCODES["sjmp"] | 0x80])
+            elif opcode.opcode == "neq":    
+                binary += bytearray([OPCODES["eq"] | 0x80])
             else:
                 if opcode.opcode.endswith("r"):
                     opcode.opcode = opcode.opcode[:-1]
@@ -318,8 +331,6 @@ def process(text):
                     num = utils.req_int(opcode.args[0], [len(binary) + 1], tosplice, binary, ws)
                     binary += bytearray([0x01 | flags, *utils.pack_num(num, ws)])
                     binary += bytearray([OPCODES["scall"] | flags])
-                elif opcode.opcode == "ret":
-                    binary += bytearray([OPCODES["sjmp"] | 0x80])
                 elif opcode.opcode in OPCODES.keys():
                     binary += bytearray([OPCODES[opcode.opcode] | flags])
                 else:

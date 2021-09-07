@@ -6,4 +6,4 @@ loop:	dup ldb
 	jmp loop
 stop:	brk
 
-msg: db "Hello world!\n"
+msg:	db "Hello world!\n", 0
