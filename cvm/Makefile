@@ -1,7 +1,7 @@
 all: linuxvm
 	./$<
 
-linuxvm: linuxvm.o vm.o
+linuxvm: linuxvm.o vm.o devices.o
 	gcc -o $@ $^
 
 %.o: %.c

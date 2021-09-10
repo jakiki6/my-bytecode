@@ -5,9 +5,47 @@ from . import screen
 '''
 devices:
     0x00: console
+      read:
+        0x00: read from stdin
+      write:
+        0x00: write to stdout
     0x10: system registers
+      read:
+        0x11: ps register
+        0x12: rs
+        0x13: ws
+      write:
+        0x11: ps register
+        0x12: rs register
+        0x13: ws register
+        0x14: exit with code
     0x20: screen
+      read:
+        0x24: screen height
+        0x25: screen width
+      width:
+        0x20: write pixel to buffer
+        0x21: red register
+        0x22: green register
+        0x23: blue register
+        0x24: x register
+        0x25: y register
+        0x26: write all changes to the actual screen
+        0x27: reset all screen registers
+        0x28: wipe screen (you should call 0x26 to be sure)
     0x30: rng
+      read:
+      write:
+        0x30: random number from 0x0000 to 0xffff
+    0x40: storage
+      read:
+        0x40: read from storage
+        0x42: size of storage
+      write:
+        0x40: write to storage
+        0x41: value register (byte)
+        0x42: address register
+        0x43: wipe storage
 '''
 
 def read(regs):

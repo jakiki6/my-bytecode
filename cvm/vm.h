@@ -10,3 +10,4 @@ typedef struct {
 
 cpu_t *create_cpu();
 void free_cpu(cpu_t *cpu);
+uint8_t cycle_cpu(cpu_t *cpu);

@@ -128,7 +128,7 @@ while running:
             old_val = ps
             ps = word
 
-        push_ps(old_val)
+        push_stack(old_val, is_rs)
     elif func == 0b00011: # drop
         pop_stack(is_rs)
     elif func == 0b00100: # dup
@@ -153,7 +153,7 @@ while running:
         a = pop_stack(is_rs)
         push_stack(int(a == b), is_rs)
     elif func == 0b01000: # not
-        push_stack(pop_stack(is_rs) ^ get_not_mask(ws), is_rs)
+        push_stack(pop_stack(is_rs) ^ 1, is_rs)
     elif func == 0b01001: # greater than
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
@@ -207,14 +207,14 @@ while running:
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a ^ b, is_rs)
-    elif func == 0b10111: # shift left
+    elif func == 0b10111: # shift
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
-        if b & 0b10000000:
+        if b & (1 << (ws * 8 - 1)):
             is_right = True
         else:
             is_right = False
-        b &= 0b01111111
+        b &= ~(1 << (ws * 8 - 1))
 
         if is_right:
             push_stack(a >> b, is_rs)
