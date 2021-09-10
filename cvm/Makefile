@@ -1,5 +1,5 @@
 all: linuxvm
-	./$<
+	./$< ../rom.bin
 
 linuxvm: linuxvm.o vm.o devices.o
 	gcc -o $@ $^

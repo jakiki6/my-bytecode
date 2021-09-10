@@ -7,6 +7,7 @@
 static uint8_t fetch_byte(cpu_t *cpu) {
 	uint8_t res = cpu->mem[cpu->pc];
 	cpu->pc++;
+	return res;
 }
 
 static uint16_t fetch_word(cpu_t *cpu) {
@@ -91,6 +92,8 @@ uint8_t cycle_cpu(cpu_t *cpu) {
 	uint8_t opcode = fetch_byte(cpu);
 	uint8_t is_rs = (opcode & 0b10000000) >> 7;
 	opcode = opcode & 0b11111;
+
+//	printf("%04hx %02hx %02hx\n", cpu->pc, opcode, is_rs);
 
 	uint16_t a, b, c;
 
