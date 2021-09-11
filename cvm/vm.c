@@ -160,9 +160,9 @@ uint8_t cycle_cpu(cpu_t *cpu) {
 		case 0b01011:	// jump
 			cpu->pc = pop_stack(cpu, is_rs);
 			break;
-		case 0b01100:	// jump conditionally
-			a = pop_stack(cpu, is_rs);
+		case 0b01100:;	// jump conditionally
 			uint16_t tpc = pop_stack(cpu, is_rs);
+			a = pop_stack(cpu, is_rs);
 			if (a) {
 				cpu->pc = tpc;
 			}
