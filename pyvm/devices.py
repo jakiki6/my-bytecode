@@ -1,6 +1,6 @@
 import sys, termios, tty, os, random
 
-from . import screen
+from . import screen, storage
 
 '''
 devices:
@@ -39,13 +39,12 @@ devices:
         0x30: random number from 0x0000 to 0xffff
     0x40: storage
       read:
-        0x40: read from storage
-        0x42: size of storage
+        0x40: read from storage from address
+        0x41: size of storage
       write:
-        0x40: write to storage
-        0x41: value register (byte)
-        0x42: address register
-        0x43: wipe storage
+        0x40: write value to storage at address
+        0x41: address register
+        0x42: wipe storage
 '''
 
 def read(regs):
@@ -69,6 +68,10 @@ def read(regs):
         res = screen.height
     elif regs["addr"] == 0x0030:
         res = random.randint(0x0000, 0xffff)
+    elif regs["addr"] == 0x0040:
+        res = storage.read()
+    elif regs["addr"] == 0x0041:
+        res = storage.size
 
     return res, mods
 
@@ -106,6 +109,12 @@ def write(regs):
         screen.init_regs()
     elif regs["addr"] == 0x0027:
         screen.wipe()
+    elif regs["addr"] == 0x0040:
+        storage.write(regs["val"])
+    elif regs["addr"] == 0x0041:
+        storage.addr = regs["val"]
+    elif regs["addr"] == 0x0042:
+        storage.wipe()
 
     return mods
 
