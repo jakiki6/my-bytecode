@@ -152,6 +152,8 @@ def parse(text):
 
             if not in_string and char == ";":
                 break
+            if not in_string and char == "\t":
+                char = "    "
 
             line += char
 
@@ -187,7 +189,15 @@ def parse(text):
                         except IndexError:
                             raise ValueError(f"Too few arguments for opcode '{o}'")
                     opcodes.append(OpCode(o, args))
-    return opcodes
+    copcodes = []
+    for opcode in opcodes:
+        if isinstance(line, OpCode):
+            if opcode.opcode.strip() == "":
+                continue
+
+        copcodes.append(opcode)
+
+    return copcodes
 
 def merge(data):
     for index, line in enumerate(data):
@@ -221,6 +231,12 @@ def preprocess(data):
             preprocess(data)
             break
 
+def clean(data):
+    for opcode in data.copy():
+        if isinstance(opcode, OpCode):
+            if opcode.opcode == "":
+                data.remove(opcode)
+
 def process(text):
     global origin, ws
     origin = 0
@@ -234,11 +250,12 @@ def process(text):
     data = parse(text)
     merge(data)
     preprocess(data)
+    clean(data)
 
     if "DEBUG" in os.environ.keys():
         for opcode in data:
             if isinstance(opcode, OpCode):
-                print(opcode.opcode, opcode.args)
+                print(repr(opcode.opcode), opcode.args)
             else:
                 print(opcode.name + ":")
 

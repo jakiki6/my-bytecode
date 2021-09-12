@@ -20,7 +20,7 @@ def draw():
     if not initialized:
         init()
 
-    print((x, y), (red, green, blue))
+#    print((x, y), (red, green, blue))
 
     screen.set_at((x, y), (red, green, blue))
 
