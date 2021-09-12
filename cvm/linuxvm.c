@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "vm.h"
 
@@ -8,13 +9,19 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	cpu_t *cpu = create_cpu();
+	cpu_t *cpu = malloc(sizeof(cpu_t *));
+	vm_init_cpu(cpu, malloc(65536));
 
 	FILE *file = fopen(argv[1], "r");
 	fread(cpu->mem, 1, 65536, file);
 	fclose(file);
 
-	while (cycle_cpu(cpu));
+	while (vm_cycle_cpu(cpu));
 
-	free_cpu(cpu);
+	free(cpu->mem);
+	free(cpu);
+}
+
+void glue_print_char(uint8_t val) {
+	printf("%c", val);
 }

@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <stdlib.h>
 
 #include "vm.h"
 #include "devices.h"
@@ -71,29 +70,18 @@ static uint16_t pop_stack(cpu_t *cpu, uint8_t is_rs) {
     }
 }
 
-cpu_t *create_cpu() {
-	cpu_t *cpu = malloc(sizeof(cpu_t *));
-
+void vm_init_cpu(cpu_t *cpu, uint8_t *mem) {
 	cpu->pc = 0;
 	cpu->ps = 0xff00;
 	cpu->rs = 0xffff;
 
-	cpu->mem = malloc(65536);
-
-	return cpu;
+	cpu->mem = mem;
 }
 
-void free_cpu(cpu_t *cpu) {
-	free(cpu->mem);
-	free(cpu);
-}
-
-uint8_t cycle_cpu(cpu_t *cpu) {
+uint8_t vm_cycle_cpu(cpu_t *cpu) {
 	uint8_t opcode = fetch_byte(cpu);
 	uint8_t is_rs = (opcode & 0b10000000) >> 7;
 	opcode = opcode & 0b11111;
-
-//	printf("%04hx %02hx %02hx\n", cpu->pc, opcode, is_rs);
 
 	uint16_t a, b, c;
 

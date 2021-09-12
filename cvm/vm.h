@@ -8,6 +8,5 @@ typedef struct {
 	uint8_t *mem;
 } cpu_t;
 
-cpu_t *create_cpu();
-void free_cpu(cpu_t *cpu);
-uint8_t cycle_cpu(cpu_t *cpu);
+void vm_init_cpu(cpu_t *cpu, uint8_t *mem);
+uint8_t vm_cycle_cpu(cpu_t *cpu);
