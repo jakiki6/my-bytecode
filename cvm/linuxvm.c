@@ -1,5 +1,7 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "vm.h"
 
@@ -24,4 +26,10 @@ int main(int argc, char *argv[]) {
 
 void glue_print_char(uint8_t val) {
 	printf("%c", val);
+}
+
+uint8_t glue_read_char() {
+	uint8_t c;
+	read(STDIN_FILENO, &c, 1);
+	return c;
 }
