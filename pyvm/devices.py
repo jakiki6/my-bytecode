@@ -45,6 +45,11 @@ devices:
         0x40: write value to storage at address
         0x41: address register
         0x42: wipe storage
+    0x50: mouse
+      read:
+        0x50: x position
+        0x51: y position
+        0x52: status
 '''
 
 def read(regs):
@@ -72,7 +77,10 @@ def read(regs):
         res = storage.read()
     elif regs["addr"] == 0x0041:
         res = storage.size
-
+    elif regs["addr"] == 0x0050:
+        res = screen.get_mouse()[0]
+    elif regs["addr"] == 0x0051:
+        res = screen.get_mouse()[1]
     return res, mods
 
 def write(regs):

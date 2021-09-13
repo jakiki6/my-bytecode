@@ -45,3 +45,11 @@ def init_regs():
 
 def wipe():
     pass
+
+def get_mouse():
+    global initialized
+    if not initialized:
+        init()
+
+    global pygame
+    return pygame.mouse.get_pos()

@@ -30,7 +30,8 @@ OPCODES = {
     "stw": 0b0011011,
     "dei": 0b0011100,
     "deo": 0b0011101,
-    "native": 0b0011110
+    "native": 0b0011110,
+    "ud": 0b0011111
 }
 
 CONSUMES = {
@@ -46,7 +47,7 @@ CONSUMES = {
     "jmp": 1,
     "jmpc": 1,
     "call": 1,
-    "ret": 1
+    "ret": 0
 }
 
 origin = 0
