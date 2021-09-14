@@ -2,36 +2,36 @@ import sys, math, os
 from . import utils
 
 OPCODES = {
-    "brk": 0b0000000,
-    "drop": 0b0000011,
-    "dup": 0b0000100,
-    "over": 0b0000101,
-    "rot": 0b0000110,
-    "eq": 0b0000111,
-    "not": 0b0001000,
-    "gth": 0b0001001,
-    "lth": 0b0001010,
-    "sjmp": 0b0001011,
-    "sjmpc": 0b0001100,
-    "scall": 0b0001101,
-    "sth": 0b0001110,
-    "add": 0b0001111,
-    "sub": 0b0010000,
-    "mul": 0b0010001,
-    "div": 0b0010010,
-    "mod": 0b0010011,
-    "and": 0b0010100,
-    "or": 0b0010101,
-    "xor": 0b0010110,
-    "shl": 0b0010111,
-    "ldb": 0b0011000,
-    "ldw": 0b0011001,
-    "stb": 0b0011010,
-    "stw": 0b0011011,
-    "dei": 0b0011100,
-    "deo": 0b0011101,
-    "native": 0b0011110,
-    "ud": 0b0011111
+    "brk": 0b00000,
+    "drop": 0b00011,
+    "dup": 0b00100,
+    "swap": 0b00101,
+    "over": 0b00110,
+    "rot": 0b00111,
+    "eq": 0b01000,
+    "not": 0b01001,
+    "gth": 0b01010,
+    "lth": 0b01011,
+    "sjmp": 0b01100,
+    "sjmpc": 0b01101,
+    "scall": 0b01110,
+    "sth": 0b01111,
+    "add": 0b10000,
+    "sub": 0b10001,
+    "mul": 0b10010,
+    "div": 0b10011,
+    "mod": 0b10100,
+    "and": 0b10101,
+    "or": 0b10110,
+    "xor": 0b10111,
+    "shl": 0b11000,
+    "ldb": 0b11001,
+    "ldw": 0b11010,
+    "stb": 0b11011,
+    "stw": 0b11100,
+    "dei": 0b11101,
+    "deo": 0b11110,
+    "native": 0b11111
 }
 
 CONSUMES = {
@@ -384,5 +384,8 @@ def process(text):
 
         if val > 0:
             raise ValueError(f"splice at 0x{hex(at)[2:].zfill(2 * size)} is too big")
+
+    while binary[-1] == 0:
+        binary = binary[:-1]
 
     return binary

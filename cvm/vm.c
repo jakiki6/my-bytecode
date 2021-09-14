@@ -111,14 +111,20 @@ uint8_t vm_cycle_cpu(cpu_t *cpu) {
 			push_stack(cpu, a, is_rs);
 			push_stack(cpu, a, is_rs);
 			break;
-		case 0b00101:	// over
+		case 0b00101:   // swap
+			b = pop_stack(cpu, is_rs);
+            a = pop_stack(cpu, is_rs);
+            push_stack(cpu, a, is_rs); 
+            push_stack(cpu, b, is_rs);
+            break;
+		case 0b00110:	// over
 			b = pop_stack(cpu, is_rs);
 			a = pop_stack(cpu, is_rs);
 			push_stack(cpu, a, is_rs);
 			push_stack(cpu, b, is_rs);
 			push_stack(cpu, a, is_rs);
 			break;
-		case 0b00110:	// rotate
+		case 0b00111:	// rotate
 			c = pop_stack(cpu, is_rs);
 			b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
@@ -126,84 +132,84 @@ uint8_t vm_cycle_cpu(cpu_t *cpu) {
             push_stack(cpu, c, is_rs);
             push_stack(cpu, a, is_rs);
 			break;
-		case 0b00111:	// equal
+		case 0b01000:	// equal
 			b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
 			push_stack(cpu, (int16_t) a == b, is_rs);
 			break;
-		case 0b01000:	// not
+		case 0b01001:	// not
 			a = pop_stack(cpu, is_rs);
 			push_stack(cpu, a ^ 1, is_rs);
 			break;
-		case 0b01001:	// greater than
+		case 0b01010:	// greater than
 			b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, (int16_t) a > b, is_rs);
 			break;
-		case 0b01010:   // less than
+		case 0b01011:   // less than
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, (int16_t) a < b, is_rs);
 			break;
-		case 0b01011:	// jump
+		case 0b01100:	// jump
 			cpu->pc = pop_stack(cpu, is_rs);
 			break;
-		case 0b01100:;	// jump conditionally
+		case 0b01101:;	// jump conditionally
 			uint16_t tpc = pop_stack(cpu, is_rs);
 			a = pop_stack(cpu, is_rs);
 			if (a) {
 				cpu->pc = tpc;
 			}
 			break;
-		case 0b01101:	// jump stash
+		case 0b01110:	// jump stash
 			push_stack(cpu, cpu->pc, !is_rs);
 			cpu->pc = pop_stack(cpu, is_rs);
 			break;
-		case 0b01110:	// stash
+		case 0b01111:	// stash
 			a = pop_stack(cpu, is_rs);
 			a = pop_stack(cpu, !is_rs);
 			break;
-		case 0b01111:	// add
+		case 0b10000:	// add
 			b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a + b, is_rs);
 			break;
-		case 0b10000:   // subtract
+		case 0b10001:   // subtract
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a - b, is_rs);
 			break;
-		case 0b10001:   // multiply
+		case 0b10010:   // multiply
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a * b, is_rs);
 			break;
-		case 0b10010:   // divide
+		case 0b10011:   // divide
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a / b, is_rs);
 			break;
-		case 0b10011:   // modulo
+		case 0b10100:   // modulo
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a % b, is_rs);
 			break;
-		case 0b10100:   // and
+		case 0b10101:   // and
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a & b, is_rs);
 			break;
-		case 0b10101:   // or
+		case 0b10110:   // or
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a | b, is_rs);
 			break;
-		case 0b10110:   // xor
+		case 0b10111:   // xor
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, a ^ b, is_rs);
 			break;
-		case 0b10111:   // shift
+		case 0b11000:   // shift
             b = pop_stack(cpu, is_rs);
             a = pop_stack(cpu, is_rs);
             uint8_t is_right = b & 0b1000000000000000 >> 15;
@@ -217,35 +223,35 @@ uint8_t vm_cycle_cpu(cpu_t *cpu) {
 
 			push_stack(cpu, a, is_rs);
 			break;
-		case 0b11000:	// load byte
+		case 0b11001:	// load byte
 			a = pop_stack(cpu, is_rs);
 			push_stack(cpu, read_byte(cpu, a), is_rs);
 			break;
-		case 0b11001:   // load word
+		case 0b11010:   // load word
             a = pop_stack(cpu, is_rs);
             push_stack(cpu, read_word(cpu, a), is_rs);
             break;
-		case 0b11010:	// store byte
+		case 0b11011:	// store byte
 			a = pop_stack(cpu, is_rs);
 			b = pop_stack(cpu, is_rs);
 			write_byte(cpu, a, (uint8_t) b);
 			break;
-		case 0b11011:   // store word 
+		case 0b11100:   // store word 
             a = pop_stack(cpu, is_rs);
             b = pop_stack(cpu, is_rs);
             write_word(cpu, a, b);
 			break;
-		case 0b11100:	// device in
+		case 0b11101:	// device in
 			a = pop_stack(cpu, is_rs);
 			push_stack(cpu, devices_read(cpu, a), is_rs);
 			break;
-		case 0b11101:	// device out
+		case 0b11110:	// device out
 			a = pop_stack(cpu, is_rs);
 			b = pop_stack(cpu, is_rs);
 
 			devices_write(cpu, a, b);
 			break;
-		case 0b11110:;	// call native blob
+		case 0b11111:;	// call native blob
 			uintptr_t addr = pop_stack(cpu, is_rs) + (uintptr_t) (&cpu->mem[0]);
 			((void (*)()) addr)();
 		default:

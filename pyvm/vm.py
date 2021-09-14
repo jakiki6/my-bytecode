@@ -135,79 +135,84 @@ while running:
         a = pop_stack(is_rs)
         push_stack(a, is_rs)
         push_stack(a, is_rs)
-    elif func == 0b00101: # over
+    elif func == 0b00101: # swap
+        b = pop_stack(is_rs)   
+        a = pop_stack(is_rs)
+        push_stack(a, is_rs)
+        push_stack(b, is_rs)
+    elif func == 0b00110: # over
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a, is_rs)
         push_stack(b, is_rs)
         push_stack(a, is_rs)
-    elif func == 0b00110: # rotate
+    elif func == 0b00111: # rotate
         c = pop_stack(is_rs)
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(b, is_rs)
         push_stack(c, is_rs)
         push_stack(a, is_rs)
-    elif func == 0b00111: # equal
+    elif func == 0b01000: # equal
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(int(a == b), is_rs)
-    elif func == 0b01000: # not
+    elif func == 0b01001: # not
         push_stack(pop_stack(is_rs) ^ 1, is_rs)
-    elif func == 0b01001: # greater than
+    elif func == 0b01010: # greater than
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(int(a > b), is_rs)
-    elif func == 0b01010: # less than
+    elif func == 0b01011: # less than
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(int(a < b), is_rs)
-    elif func == 0b01011: # jump
+    elif func == 0b01100: # jump
         pc = pop_stack(is_rs)
-    elif func == 0b01100: # jump conditionally
+    elif func == 0b01101: # jump conditionally
         a = pop_stack(is_rs)
         flag = pop_stack(is_rs)
 
         if flag:
             pc = a
-    elif func == 0b01101: # jump stash
+    elif func == 0b01110: # jump stash
         push_stack(pc, not is_rs)
         pc = pop_stack(is_rs)
-    elif func == 0b01110: # stash
+    elif func == 0b01111: # stash
         push_stack(pop_stack(is_rs), not is_rs)
-    elif func == 0b01111: # add
+    elif func == 0b10000: # add
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a + b, is_rs)
-    elif func == 0b10000: # subtract
+    elif func == 0b10001: # subtract
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a - b, is_rs)
-    elif func == 0b10001: # multiply
+    elif func == 0b10010: # multiply
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a * b, is_rs)
-    elif func == 0b10010: # divide
+    elif func == 0b10011: # divide
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a // b, is_rs)
-    elif func == 0b10011: # modulo
+    elif func == 0b10100: # modulo
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a % b, is_rs)
-    elif func == 0b10100: # and
+    elif func == 0b10101: # and
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a & b, is_rs)
-    elif func == 0b10101: # or
+    elif func == 0b10110: # or
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a | b, is_rs)
-    elif func == 0b10110: # xor
+    elif func == 0b10111: # xor
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         push_stack(a ^ b, is_rs)
-    elif func == 0b10111: # shift
+    elif func == 0b11000: # shift
         b = pop_stack(is_rs)
         a = pop_stack(is_rs)
         if b & (1 << (ws * 8 - 1)):
@@ -220,35 +225,35 @@ while running:
             push_stack(a >> b, is_rs)
         else:
             push_stack(a << b, is_rs)
-    elif func == 0b11000: # load byte
+    elif func == 0b11001: # load byte
         a = pop_stack(is_rs)
         push_stack(read_byte(a), is_rs)
-    elif func == 0b11001: # load word
+    elif func == 0b11010: # load word
         a = pop_stack(is_rs)
         push_stack(read_word(a), is_rs)
-    elif func == 0b11010: # store byte
+    elif func == 0b11011: # store byte
         a = pop_stack(is_rs)
         val = pop_stack(is_rs)
         write_byte(val, a), is_rs
-    elif func == 0b11011: # store word
+    elif func == 0b11100: # store word
         a = pop_stack(is_rs)
         val = pop_stack(is_rs)
         write_word(val, a)
-    elif func == 0b11100: # device in
+    elif func == 0b11101: # device in
         a = pop_stack(is_rs)
         regs = {"pc": pc, "ps": ps, "rs": rs, "ram": ram, "ws": ws, "addr": a}
         val, changes = devices.read(regs)
         for k, v in changes.items():
             vars()[k] = v
         push_stack(val, is_rs)
-    elif func == 0b11101: # device out
+    elif func == 0b11110: # device out
         a = pop_stack(is_rs)
         val = pop_stack(is_rs)
         regs = {"pc": pc, "ps": ps, "rs": rs, "ram": ram, "ws": ws, "addr": a, "val": val}
         changes = devices.write(regs)
         for k, v in changes.items():
             vars()[k] = v
-    elif func == 0b11110: # call native blob
+    elif func == 0b11111: # call native blob
         addr = pop_stack(is_rs)
 
         code = ""
@@ -262,9 +267,6 @@ while running:
             code += chr(char)
 
         exec(code)        
-    elif func == 0b11111: # rick roller
-        import webbrowser
-        webbrowser.open("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
     else:
         print(f"Unknown function {bin(func)} with rs flag set to '{is_rs}'")
         running = False
