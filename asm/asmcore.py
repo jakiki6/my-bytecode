@@ -317,7 +317,9 @@ def process(text):
             elif opcode.opcode == "ret":
                 binary += bytearray([OPCODES["sjmp"] | 0x80])
             elif opcode.opcode == "neq":    
-                binary += bytearray([OPCODES["eq"] | 0x80])
+                binary += bytearray([OPCODES["eq"], OPCODES["not"]])
+            elif opcode.opcode == "word":
+                binary += bytearray(ws)
             else:
                 if opcode.opcode.endswith("r"):
                     opcode.opcode = opcode.opcode[:-1]

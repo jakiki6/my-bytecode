@@ -272,3 +272,6 @@ while running:
         running = False
 
 print(f"Halted execution with registers pc=0x{hex(pc)[2:].zfill(4)} ps=0x{hex(ps)[2:].zfill(4)} rs=0x{hex(rs)[2:].zfill(4)} ws={ws}")
+
+with open("/tmp/ram.bin", "wb") as file:
+    file.write(ram)
